@@ -1,0 +1,99 @@
+<div class="{% if section.settings.include_margins %}page-width{% endif %}">
+my section !
+{% if section.blocks.size > 0 %}
+  {% for block in section.blocks %}
+
+      {% if block.type == "collection" %}
+          <p>collection</p>
+          {% for product in block.settings.collection.products %}
+          product
+          {% render 'card-product',
+          card_product: product,
+          media_aspect_ratio: section.settings.image_ratio,
+          show_secondary_image: section.settings.show_secondary_image,
+          show_vendor: section.settings.show_vendor,
+          show_rating: section.settings.show_rating,
+          show_quick_add: section.settings.enable_quick_add,
+          section_id: section.id
+        %}
+          {% endfor %}
+        
+      {% endif %}
+
+      {% if block.type == "products" %}
+          <p>products</p>
+        
+      {% endif %}
+    
+  {% endfor %} 
+{% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Products presentation",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "include_margins",
+      "default": true,
+      "label": "t:sections.apps.settings.include_margins.label"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "collection",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "range",
+          "id": "number_range",
+          "min": 1,
+          "max": 12,
+          "step": 1,
+          "label": "Number of products",
+          "default": 4
+        }
+      ]
+
+    },
+    {
+      "type": "products",
+      "name": "products",
+      "settings": [
+      {
+        "type": "product",
+        "id": "product1",
+        "label": "Product"
+      },
+      {
+        "type": "product",
+        "id": "product2",
+        "label": "Product"
+      },
+      {
+        "type": "product",
+        "id": "product3",
+        "label": "Product"
+      },{
+        "type": "product",
+        "id": "product4",
+        "label": "Product"
+      }
+    ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Products presentation"
+    }
+  ]
+}
+{% endschema %}
