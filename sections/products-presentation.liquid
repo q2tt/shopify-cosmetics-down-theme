@@ -129,38 +129,53 @@
 
 <script>
   document.addEventListener("DOMContentLoaded", function() {
+//     jQuery.getJSON('/cart.js', function(cart) {
+//    // now have access to Shopify cart object
+//    console.log(cart.items)
+// } );
 
     $('#shopify-section-{{section.id}}').on('click',  '[data-ajax-add]', function (e) {
-       event.preventDefault();
+      event.preventDefault();
         const itemId =  parseInt($(this).attr('data-ajax-add'));
-       
-        if ($('input.three').prop('checked')) {
-              console.log('g')
-          }
+        let isInCart = false;
 
-        $.ajax({
-          type: 'POST',
-          url: '/cart/add.js',
-          dataType: 'json',
-          data: {
-              quantity: 1,
-              id: itemId
-          },
-          success: function(data) {
-             console.log(data, "data")
-               $.ajax({
-                  type: 'GET',
-                  dataType: 'jsonp',
-                  url: '/cart.json',
-                  // Если удачно
-                  success: function(cart) {
-                    console.log(cart, "cart")
-                  }
-              }) 
+        jQuery.getJSON('/cart.js', function(cart) {
+          for(let i =0; i < cart.items.length; i++  ){
+             if(itemId  === cart.items[i].id){
+              isInCart = true;
+               alert('you have this product in a cart');
+             } 
           }
-      })
+          if(isInCart === false){
+            addProductToCart(itemId);
+          }
+        } );  
     });
-  })
+
+
+    function addProductToCart(itemId){          
+      $.ajax({
+                  type: 'POST',
+                  url: '/cart/add.js',
+                  dataType: 'json',
+                  data: {
+                      quantity: 1,
+                      id: itemId
+                  },
+                  success: function(data) {
+                    console.log(data, "data")
+                      $.ajax({
+                          type: 'GET',
+                          dataType: 'jsonp',
+                          url: '/cart.json',
+                          success: function(cart) {
+                            console.log(cart, "cart")
+                          }
+                      }) 
+                  }
+      })
+   }     
+})
 </script>
 
 <script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
