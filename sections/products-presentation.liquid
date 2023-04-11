@@ -1,34 +1,15 @@
 {{ 'product-presentation.css' | asset_url | stylesheet_tag }}
-{{ 'component-rating.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'jquery-3.6.3.js' | asset_url }}" defer="defer"></script>
-
-<script src="{{ 'quick-add.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
-
-{{ 'section-main-product.css' | asset_url | stylesheet_tag }}
-{{ 'component-accordion.css' | asset_url | stylesheet_tag }}
-{{ 'component-price.css' | asset_url | stylesheet_tag }}
-{{ 'component-slider.css' | asset_url | stylesheet_tag }}
-{{ 'component-rating.css' | asset_url | stylesheet_tag }}
-{{ 'component-loading-overlay.css' | asset_url | stylesheet_tag }}
-{{ 'component-deferred-media.css' | asset_url | stylesheet_tag }}
-
-<script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
 
 <div class="presentation__wrapper">
 
   {% if section.settings.section-title != blank %}
-      <h2>{{section.settings.section-title }} </h2>
+      <h2 class="presentation__title">{{section.settings.section-title }} </h2>
   {% endif %}
-      <!-- 1 {{cart.currency}} <br>
-    2 {{cart.checkout_charge_amount}} <br> -->
-      <!-- 3 {{cart.items | json}}  -->
   {% if section.blocks.size > 0 %}
       {% for block in section.blocks %}
 
         {% if block.type == "collection" %}
-        <p>collection</p>
         <div class="products-wrapper">
 
           {% for product in block.settings.collection.products %}
@@ -44,58 +25,61 @@
                 %}
                 {% if product.metafields.global.limit-save.value != blank %}
                   <form action="choose-option">
-                    <div class="metadilds-wrapper">
-                      <div>
-                        <label for="3month-{{product.id}}">{{ product.metafields.global.limit-save.value }}</label>
+                    <div class="presentation__metadilds-wrapper presentation__metadilds-btns">
+                      <div class="presentation__metadild presentation__metadild_white-save">
+                        <label class="presentation__label " for="3month-{{product.id}}">{{ product.metafields.global.limit-save.value }}</label>
                       </div>
                       {% if product.metafields.global.just-once.value!= blank %}
-                        <div>
-                          <label for="1month-{{product.id}}">{{ product.metafields.global.just-once.value }}</label>
+                        <div class="presentation__metadild presentation__metadild_gray-save">
+                          <label class="presentation__label lab-month-{{product.id}}" for="1month-{{product.id}}">{{ product.metafields.global.just-once.value }}</label>
                         </div>
                       {% endif %}
                     </div>
 
                     {% for item in product.variants %}
-                        {% if item.title == '3month' %}
-                            <button class="rr" data-ajax-add="{{ item.id}}">Add to cart - {{item.price | money_with_currency }}</button>
-                            <input type="radio" checked class="month3-label" id="3month-{{product.id}}" name="fav_language" value="HTML">
-                        {% endif %}
+                      <div class="presentation__btns-add_wrap">
+                            {% if item.title == '3month' %}
+                                <button class="presentation__btn-add presentation__btn-3month rr" data-ajax-add="{{ item.id}}">Add to cart - {{item.price | money_with_currency }}</button>
+                                <input type="radio" checked class="month3-label" id="3month-{{product.id}}" name="fav_language" value="HTML">
+                            {% endif %}
 
-                        {% if item.title == '1month' %}
-                            <input type="radio" class="month1-label" id="1month-{{product.id}}" name="fav_language" value="CSS">
-                            <button class="r" data-ajax-add="{{ item.id}}">Add to cart - {{item.price | money_with_currency }}</button>
-                        {% endif %}
+                            {% if item.title == '1month' %}
+                                <input type="radio" class="month1-label" id="1month-{{product.id}}" name="fav_language" value="CSS">
+                                <button class=" presentation__btn-add presentation__btn-1month r" data-ajax-add="{{ item.id}}">Add to cart - {{item.price | money_with_currency }}</button>
+                            {% endif %}
+                      </div>
                     {% endfor %}
 
                     {% style %}
-                        .rr{ background-color: pink; }
-                        input[type=checkbox]:checked ~ .r{
-                        background-color: yellowgreen;
-                        color:red;
-                        }
-                        .month1-label:checked ~ .r{ background-color: red; }
-                        .month3-label:checked ~ .rr{ background-color: green; display: none }
+                        .month1-label:checked ~ .presentation__btn-1month{ 
+                          visibility: visible;
+                         }
                     {% endstyle %}
                 
                   </form>
                 {% else %}
-                  <div class="metadilds-wrapper">
+                  <div class="presentation__metadilds-wrapper">
                     {% if product.metafields.global.just-once.value != blank %}
-                        {{ product.metafields.global.just-once.value }}
+                        <div class="presentation__metadild presentation__metadild_gray">
+                          {{ product.metafields.global.just-once.value }}
+                        </div> 
                     {% endif %}
                     {% if product.metafields.global.save.value != blank %}
+                      <div class="presentation__metadild presentation__metadild_pink">
                         {{ product.metafields.global.save.value }}
+                      </div>   
                     {% endif %}
-                    <button class="" data-ajax-add="{{ product.selected_or_first_available_variant.id }}">Add to cart -
-                      {{product.price | money_with_currency }}</button>
+                   
                   </div>
+                  <button class="presentation__btn-add " data-ajax-add="{{ product.selected_or_first_available_variant.id }}">Add to cart -
+                    {{product.price | money_with_currency }}</button>
               {% endif %}
             </div>
       {% endfor %}
   {% endif %}
 
 {% if block.type == "products" %}
-<p>products</p>
+
 <div class="products-wrapper">
   {% for i in (1..4) %}
 
@@ -129,11 +113,6 @@
 
 <script>
   document.addEventListener("DOMContentLoaded", function() {
-//     jQuery.getJSON('/cart.js', function(cart) {
-//    // now have access to Shopify cart object
-//    console.log(cart.items)
-// } );
-
     $('#shopify-section-{{section.id}}').on('click',  '[data-ajax-add]', function (e) {
       event.preventDefault();
         const itemId =  parseInt($(this).attr('data-ajax-add'));
@@ -177,6 +156,12 @@
    }     
 })
 </script>
+
+<style>
+  section{
+    background-color: #F5F5F5;
+  }
+</style>
 
 <script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
 {% schema %}
