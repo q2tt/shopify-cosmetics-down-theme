@@ -1,34 +1,169 @@
-<div class="{% if section.settings.include_margins %}page-width{% endif %}">
-my section !
-{% if section.blocks.size > 0 %}
-  {% for block in section.blocks %}
+{{ 'product-presentation.css' | asset_url | stylesheet_tag }}
+{{ 'component-rating.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'jquery-3.6.3.js' | asset_url }}" defer="defer"></script>
 
-      {% if block.type == "collection" %}
-          <p>collection</p>
+<script src="{{ 'quick-add.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+
+{{ 'section-main-product.css' | asset_url | stylesheet_tag }}
+{{ 'component-accordion.css' | asset_url | stylesheet_tag }}
+{{ 'component-price.css' | asset_url | stylesheet_tag }}
+{{ 'component-slider.css' | asset_url | stylesheet_tag }}
+{{ 'component-rating.css' | asset_url | stylesheet_tag }}
+{{ 'component-loading-overlay.css' | asset_url | stylesheet_tag }}
+{{ 'component-deferred-media.css' | asset_url | stylesheet_tag }}
+
+<script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+
+<div class="presentation__wrapper">
+
+  {% if section.settings.section-title != blank %}
+      <h2>{{section.settings.section-title }} </h2>
+  {% endif %}
+      <!-- 1 {{cart.currency}} <br>
+    2 {{cart.checkout_charge_amount}} <br> -->
+      <!-- 3 {{cart.items | json}}  -->
+  {% if section.blocks.size > 0 %}
+      {% for block in section.blocks %}
+
+        {% if block.type == "collection" %}
+        <p>collection</p>
+        <div class="products-wrapper">
+
           {% for product in block.settings.collection.products %}
-          product
-          {% render 'card-product',
-          card_product: product,
-          media_aspect_ratio: section.settings.image_ratio,
-          show_secondary_image: section.settings.show_secondary_image,
-          show_vendor: section.settings.show_vendor,
-          show_rating: section.settings.show_rating,
-          show_quick_add: section.settings.enable_quick_add,
-          section_id: section.id
-        %}
-          {% endfor %}
-        
-      {% endif %}
+            <div class="product-wrap">
+                {% render 'card-product',
+                card_product: product,
+                media_aspect_ratio: false,
+                show_secondary_image: true,
+                show_vendor: false,
+                show_rating: false,
+                show_quick_add: false,
+                section_id: section.id
+                %}
+                {% if product.metafields.global.limit-save.value != blank %}
+                  <form action="choose-option">
+                    <div class="metadilds-wrapper">
+                      <div>
+                        <label for="3month-{{product.id}}">{{ product.metafields.global.limit-save.value }}</label>
+                      </div>
+                      {% if product.metafields.global.just-once.value!= blank %}
+                        <div>
+                          <label for="1month-{{product.id}}">{{ product.metafields.global.just-once.value }}</label>
+                        </div>
+                      {% endif %}
+                    </div>
 
-      {% if block.type == "products" %}
-          <p>products</p>
-        
-      {% endif %}
-    
-  {% endfor %} 
+                    {% for item in product.variants %}
+                        {% if item.title == '3month' %}
+                            <button class="rr" data-ajax-add="{{ item.id}}">Add to cart - {{item.price | money_with_currency }}</button>
+                            <input type="radio" checked class="month3-label" id="3month-{{product.id}}" name="fav_language" value="HTML">
+                        {% endif %}
+
+                        {% if item.title == '1month' %}
+                            <input type="radio" class="month1-label" id="1month-{{product.id}}" name="fav_language" value="CSS">
+                            <button class="r" data-ajax-add="{{ item.id}}">Add to cart - {{item.price | money_with_currency }}</button>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% style %}
+                        .rr{ background-color: pink; }
+                        input[type=checkbox]:checked ~ .r{
+                        background-color: yellowgreen;
+                        color:red;
+                        }
+                        .month1-label:checked ~ .r{ background-color: red; }
+                        .month3-label:checked ~ .rr{ background-color: green; display: none }
+                    {% endstyle %}
+                
+                  </form>
+                {% else %}
+                  <div class="metadilds-wrapper">
+                    {% if product.metafields.global.just-once.value != blank %}
+                        {{ product.metafields.global.just-once.value }}
+                    {% endif %}
+                    {% if product.metafields.global.save.value != blank %}
+                        {{ product.metafields.global.save.value }}
+                    {% endif %}
+                    <button class="" data-ajax-add="{{ product.selected_or_first_available_variant.id }}">Add to cart -
+                      {{product.price | money_with_currency }}</button>
+                  </div>
+              {% endif %}
+            </div>
+      {% endfor %}
+  {% endif %}
+
+{% if block.type == "products" %}
+<p>products</p>
+<div class="products-wrapper">
+  {% for i in (1..4) %}
+
+  {% assign product_num = 'product' | append: i %}
+  {% assign product = block.settings[product_num]%}
+
+
+  pr-{{product}} <br>
+  {{product_num}} <br>
+
+
+  <!-- 1 {{block.settings.product_num}}
+           2 {{block.settings.product_num | json}} -->
+  {% render 'card-product',
+  product: product,
+  media_aspect_ratio: section.settings.image_ratio,
+  show_secondary_image: section.settings.show_secondary_image,
+  show_vendor: section.settings.show_vendor,
+  show_rating: section.settings.show_rating,
+  show_quick_add: section.settings.enable_quick_add,
+  section_id: section.id
+  %}
+
+  {% endfor %}
+</div>
+{% endif %}
+
+{% endfor %}
 {% endif %}
 </div>
 
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+
+    $('#shopify-section-{{section.id}}').on('click',  '[data-ajax-add]', function (e) {
+       event.preventDefault();
+        const itemId =  parseInt($(this).attr('data-ajax-add'));
+       
+        if ($('input.three').prop('checked')) {
+              console.log('g')
+          }
+
+        $.ajax({
+          type: 'POST',
+          url: '/cart/add.js',
+          dataType: 'json',
+          data: {
+              quantity: 1,
+              id: itemId
+          },
+          success: function(data) {
+             console.log(data, "data")
+               $.ajax({
+                  type: 'GET',
+                  dataType: 'jsonp',
+                  url: '/cart.json',
+                  // Если удачно
+                  success: function(cart) {
+                    console.log(cart, "cart")
+                  }
+              }) 
+          }
+      })
+    });
+  })
+</script>
+
+<script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
 {% schema %}
 {
   "name": "Products presentation",
@@ -40,6 +175,12 @@ my section !
       "id": "include_margins",
       "default": true,
       "label": "t:sections.apps.settings.include_margins.label"
+    },
+    {
+      "type": "text",
+      "id": "section-title",
+      "label": "Title",
+      "default": "Featured Products"
     }
   ],
   "blocks": [
