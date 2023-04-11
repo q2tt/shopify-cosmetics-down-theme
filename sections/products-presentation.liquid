@@ -86,22 +86,72 @@
   {% assign product_num = 'product' | append: i %}
   {% assign product = block.settings[product_num]%}
 
+  {% if product != blank %}
+  <div class="product-wrap">
+    {% render 'card-product',
+    card_product: product,
+    media_aspect_ratio: false,
+    show_secondary_image: true,
+    show_vendor: false,
+    show_rating: false,
+    show_quick_add: false,
+    section_id: section.id
+    %}
+    {% if product.metafields.global.limit-save.value != blank %}
+      <form action="choose-option">
+        <div class="presentation__metadilds-wrapper presentation__metadilds-btns">
+          <div class="presentation__metadild presentation__metadild_white-save">
+            <label class="presentation__label " for="3month-{{product.id}}">{{ product.metafields.global.limit-save.value }}</label>
+          </div>
+          {% if product.metafields.global.just-once.value!= blank %}
+            <div class="presentation__metadild presentation__metadild_gray-save">
+              <label class="presentation__label lab-month-{{product.id}}" for="1month-{{product.id}}">{{ product.metafields.global.just-once.value }}</label>
+            </div>
+          {% endif %}
+        </div>
 
-  pr-{{product}} <br>
-  {{product_num}} <br>
+        {% for item in product.variants %}
+          <div class="presentation__btns-add_wrap">
+                {% if item.title == '3month' %}
+                    <button class="presentation__btn-add presentation__btn-3month rr" data-ajax-add="{{ item.id}}">Add to cart - {{item.price | money_with_currency }}</button>
+                    <input type="radio" checked class="month3-label" id="3month-{{product.id}}" name="fav_language" value="HTML">
+                {% endif %}
 
+                {% if item.title == '1month' %}
+                    <input type="radio" class="month1-label" id="1month-{{product.id}}" name="fav_language" value="CSS">
+                    <button class=" presentation__btn-add presentation__btn-1month r" data-ajax-add="{{ item.id}}">Add to cart - {{item.price | money_with_currency }}</button>
+                {% endif %}
+          </div>
+        {% endfor %}
 
-  <!-- 1 {{block.settings.product_num}}
-           2 {{block.settings.product_num | json}} -->
-  {% render 'card-product',
-  product: product,
-  media_aspect_ratio: section.settings.image_ratio,
-  show_secondary_image: section.settings.show_secondary_image,
-  show_vendor: section.settings.show_vendor,
-  show_rating: section.settings.show_rating,
-  show_quick_add: section.settings.enable_quick_add,
-  section_id: section.id
-  %}
+        {% style %}
+            .month1-label:checked ~ .presentation__btn-1month{ 
+              visibility: visible;
+             }
+        {% endstyle %}
+    
+      </form>
+    {% else %}
+      <div class="presentation__metadilds-wrapper">
+        {% if product.metafields.global.just-once.value != blank %}
+            <div class="presentation__metadild presentation__metadild_gray">
+              {{ product.metafields.global.just-once.value }}
+            </div> 
+        {% endif %}
+        {% if product.metafields.global.save.value != blank %}
+          <div class="presentation__metadild presentation__metadild_pink">
+            {{ product.metafields.global.save.value }}
+          </div>   
+        {% endif %}
+       
+      </div>
+      <button class="presentation__btn-add " data-ajax-add="{{ product.selected_or_first_available_variant.id }}">Add to cart -
+        {{product.price | money_with_currency }}</button>
+  {% endif %}
+</div>
+  {% endif %}
+
+ 
 
   {% endfor %}
 </div>
@@ -183,7 +233,8 @@
       "default": "Featured Products"
     }
   ],
-  "blocks": [
+  "max_blocks": 1,
+  "blocks": [ 
     {
       "type": "collection",
       "name": "collection",

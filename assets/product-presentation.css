@@ -256,3 +256,10 @@
     }
 }
 
+.card__media, .card .media {
+    width: 100%;
+    bottom: 0;
+    position: absolute;
+    top: 0;
+}
+
